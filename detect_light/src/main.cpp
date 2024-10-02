@@ -18,7 +18,12 @@ void setup() {
   pinMode(rightLed, OUTPUT);
   pinMode(serviceLed, OUTPUT);
   digitalWrite(serviceLed,HIGH);
-  delay(delayForSwithPos);
+  //delay(delayForSwithPos);
+  // change delay to millis
+  long start=millis();
+  while (start+delayForSwithPos>=millis()){
+  }
+  // 
   Serial.begin(9600);
  
 
@@ -29,9 +34,15 @@ void setup() {
   // цикл калибровки
   for (size_t i = 0; i < 4; i++)
   {
+    //break;
     //ждем смену состояния 
     digitalWrite(serviceLed,LOW);
-    delay(delayForSwithPos);
+//    delay(delayForSwithPos);
+       // change delay to millis
+      long start=millis();
+      while (start+delayForSwithPos>=millis()){
+      }
+
     digitalWrite(serviceLed,HIGH);
     //переключаем пины
     if (i==2){
@@ -72,16 +83,69 @@ for (size_t i = 0; i < 4; i++)
   digitalWrite(serviceLed,LOW);
 }
 
-
+void blinking(int led_l, int led_h)
+{
+  int start_time = millis();
+  while(millis()-start_time<500)
+  {
+   digitalWrite(led_l,LOW);
+   digitalWrite(led_h,HIGH);
+  }
+  start_time = millis();
+  while(millis()-start_time<500)
+  {
+   digitalWrite(led_h,LOW);
+  }
+}
+long time_start=millis();
+int blinkInterval=500;
+bool is_on=false;
+int ledNow=0;
 void loop() {
-  int left = analogRead(leftPin);
-  int right = analogRead(rightPin);
+  //int values[] = {450, 60, 615, 30}; 
+  float left = analogRead(leftPin);
+  float right = analogRead(rightPin);
 
+  float left_p = left/(values[0] - values[1])*100;
+  float right_p = right/(values[2] - values[3])*100;
+
+
+  if (left_p - right_p > 15.0)
+  {
+    digitalWrite(rightLed,LOW);
+    ledNow=leftLed;
+    //digitalWrite(leftLed,HIGH);
+  }
+  else if (left_p - right_p < -15.0)
+  {
+ 
+    digitalWrite(leftLed,LOW);
+    ledNow=rightLed;
+   // digitalWrite(rightLed,HIGH);
+  }
+  else if ((left_p>50.0) && (right_p>50.0))
+  {
+    digitalWrite(leftLed,HIGH);
+    digitalWrite(rightLed,HIGH);
+    ledNow = 0;
+  }
+  //blink 
+  if (time_start+blinkInterval<=millis()){
+    time_start=millis();
+    if (is_on){
+    digitalWrite(ledNow,HIGH);
+      
+    }else{
+ digitalWrite(ledNow,LOW);
+   
   Serial.print("left ");
-  Serial.print(left);
-  Serial.print(" right ");
-  Serial.print(right);
-  Serial.println("");
-  delay(800);
+  Serial.print(left_p);
+  Serial.print("% right ");
+  Serial.print(right_p);
+  Serial.println("%");
 
+  Serial.println(left_p - right_p);
+    }
+    is_on=!is_on;
+  }
 }
