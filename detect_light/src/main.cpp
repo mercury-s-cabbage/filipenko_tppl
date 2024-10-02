@@ -1,18 +1,24 @@
 #include <Arduino.h>
 
-// put function declarations here:
-int myFunction(int, int);
+#define leftPin A1
+
+#define rightPin A0
 
 void setup() {
-  // put your setup code here, to run once:
-  int result = myFunction(2, 3);
+  Serial.begin(9600);
+  Serial.print("HELOO");
+
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-}
+  int left = analogRead(leftPin);
+  int right = analogRead(rightPin);
 
-// put function definitions here:
-int myFunction(int x, int y) {
-  return x + y;
+  Serial.print("left ");
+  Serial.print(left);
+  Serial.print(" right ");
+  Serial.print(right);
+  Serial.println("");
+  delay(800);
+
 }
