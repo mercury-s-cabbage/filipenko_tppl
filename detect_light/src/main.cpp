@@ -74,14 +74,17 @@ for (size_t i = 0; i < 4; i++)
 
 
 void loop() {
-  int left = analogRead(leftPin);
-  int right = analogRead(rightPin);
+  float left = analogRead(leftPin);
+  float right = analogRead(rightPin);
+
+  float left_p = right/(values[0] - values[1])*100;
+  float right_p = right/(values[2] - values[3])*100;
 
   Serial.print("left ");
   Serial.print(left);
-  Serial.print(" right ");
+  Serial.print("% right ");
   Serial.print(right);
-  Serial.println("");
-  delay(800);
+  Serial.println("%");
 
+  delay(3000);
 }
