@@ -1,0 +1,12 @@
+{
+	"folders": [
+		{
+			"path": "../traffic_light"
+		},
+		{
+			"name": "detect_light",
+			"path": "."
+		}
+	],
+	"settings": {}
+}
