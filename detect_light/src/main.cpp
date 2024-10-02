@@ -96,5 +96,22 @@ void loop() {
   Serial.print(right);
   Serial.println("%");
 
+  if (left_p - right_p > 3.0)
+  {
+    digitalWrite(rightLed,LOW);
+    digitalWrite(leftLed,HIGH);
+  }
+  else if (left_p - right_p < -3.0)
+  {
+    digitalWrite(leftLed,LOW);
+    digitalWrite(rightLed,HIGH);
+  }
+  else
+  {
+    digitalWrite(leftLed,HIGH);
+    digitalWrite(rightLed,HIGH);
+  }
+
+
   delay(3000);
 }
