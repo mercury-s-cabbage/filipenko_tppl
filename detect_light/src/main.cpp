@@ -18,7 +18,12 @@ void setup() {
   pinMode(rightLed, OUTPUT);
   pinMode(serviceLed, OUTPUT);
   digitalWrite(serviceLed,HIGH);
-  delay(delayForSwithPos);
+  //delay(delayForSwithPos);
+  // change delay to millis
+  long start=millis();
+  while (start+delayForSwithPos>=millis(){
+  }
+  // 
   Serial.begin(9600);
  
 
@@ -31,7 +36,12 @@ void setup() {
   {
     //ждем смену состояния 
     digitalWrite(serviceLed,LOW);
-    delay(delayForSwithPos);
+//    delay(delayForSwithPos);
+       // change delay to millis
+      long start=millis();
+      while (start+delayForSwithPos>=millis(){
+      }
+
     digitalWrite(serviceLed,HIGH);
     //переключаем пины
     if (i==2){
