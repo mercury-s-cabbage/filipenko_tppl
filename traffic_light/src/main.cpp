@@ -58,6 +58,7 @@ void loop(){
       bool switched=true;
       int pinNow=1; 
       long time_to_end=60000; 
+      bool fl=true;
       long start_time_to_end=millis();
         while (fl){
         if (start_time_to_end+time_to_end<=millis){
