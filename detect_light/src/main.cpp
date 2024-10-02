@@ -34,7 +34,7 @@ void setup() {
   // цикл калибровки
   for (size_t i = 0; i < 4; i++)
   {
-    break;
+    //break;
     //ждем смену состояния 
     digitalWrite(serviceLed,LOW);
 //    delay(delayForSwithPos);
@@ -97,17 +97,47 @@ void blinking(int led_l, int led_h)
    digitalWrite(led_h,LOW);
   }
 }
-
-
-
+long time_start=millis();
+int blinkInterval=500;
+bool is_on=false;
+int ledNow=0;
 void loop() {
-  int values[] = {450, 60, 615, 30}; 
+  //int values[] = {450, 60, 615, 30}; 
   float left = analogRead(leftPin);
   float right = analogRead(rightPin);
 
   float left_p = left/(values[0] - values[1])*100;
   float right_p = right/(values[2] - values[3])*100;
 
+
+  if (left_p - right_p > 15.0)
+  {
+    digitalWrite(rightLed,LOW);
+    ledNow=leftLed;
+    //digitalWrite(leftLed,HIGH);
+  }
+  else if (left_p - right_p < -15.0)
+  {
+ 
+    digitalWrite(leftLed,LOW);
+    ledNow=rightLed;
+   // digitalWrite(rightLed,HIGH);
+  }
+  else if ((left_p>50.0) && (right_p>50.0))
+  {
+    digitalWrite(leftLed,HIGH);
+    digitalWrite(rightLed,HIGH);
+    ledNow = 0;
+  }
+  //blink 
+  if (time_start+blinkInterval<=millis()){
+    time_start=millis();
+    if (is_on){
+    digitalWrite(ledNow,HIGH);
+      
+    }else{
+ digitalWrite(ledNow,LOW);
+   
   Serial.print("left ");
   Serial.print(left_p);
   Serial.print("% right ");
@@ -115,23 +145,7 @@ void loop() {
   Serial.println("%");
 
   Serial.println(left_p - right_p);
-
-  if (left_p - right_p > 15.0)
-  {
-  
-    digitalWrite(rightLed,LOW);
-    digitalWrite(leftLed,HIGH);
+    }
+    is_on=!is_on;
   }
-  else if (left_p - right_p < -15.0)
-  {
- 
-    digitalWrite(leftLed,LOW);
-    digitalWrite(rightLed,HIGH);
-  }
-  else if ((left_p>50.0) && (right_p>50.0))
-  {
-    digitalWrite(leftLed,HIGH);
-    digitalWrite(rightLed,HIGH);
-  }
-
 }
