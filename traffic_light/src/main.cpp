@@ -6,15 +6,19 @@ const int yellow_led=3;
 
 //green, blinking, yellow, red, yellow
 const long durations[] = {10000, 2000, 1000, 7000, 1000};
+//time between LOW and HIGH during blinking
+const int traffic_blink_delay=200;
+//yellow lighting between modes
+const int switch_yellow_delay=3000;
 
 //??
 const long traffic_delay=16000;
-const int traffic_blink_count=3;
-const int traffic_blink_delay=200;
 const  int traffic_yellow_delay=7000;
 
 //mode 0 -default, 1 -manual
-int mode=0;
+int mode=1;
+int manual_max_time=60000;
+
 //increment how to go array
 int inc=1;
 //light 0 -green, 1 -yellow, 2 -red
@@ -31,19 +35,12 @@ GyverTM1637 disp(CLK, DIO);
 int myPins[] = {red_led, yellow_led, green_led};
 void setup() 
 { 
-  //testing leds
   for (int pin:myPins)
   {
     pinMode(pin, OUTPUT);
     digitalWrite(pin, HIGH);
   }
-  delay(120);
-  for (int pin:myPins)
-  {
-    digitalWrite(pin, LOW);
-    delay(120);
-  }
-  
+
   disp.clear();
   disp.brightness(7);
   Serial.begin(9600);
@@ -78,70 +75,44 @@ void endBlink(int led)
       }
       now_blinking=millis();
     }
+    digitalWrite(myPins[led],LOW);
 }
 
-bool service_menu=true;
-void loop(){
-   
+void switchYellow()
+{
+    int start_yellow=millis();
+    int now_yellow=millis();
+    digitalWrite(yellow_led,HIGH);
+    while (now_yellow-start_yellow<switch_yellow_delay)
+    {
+      now_yellow=millis();
+    }
+    digitalWrite(yellow_led,LOW);
+}
+
+//потом перенести в энтер мод
+int manual_start_time=millis();
+void loop()
+{
+    //enter mode
+    //...
+
+    //manual
     if (mode==1)
-    { int start_time=millis();
-      bool switched=true;
-      int pinNow=1; 
-      long time_to_end=60000; 
-      bool fl=true;
-      long start_time_to_end=millis();
-        while (fl){
-        if (start_time_to_end+time_to_end<=millis){
-            mode=0;
-            break;
-        }
-        if (service_menu){
-            if (start_time+traffic_blink_delay<=millis()){
-            start_time=millis();
-
-            switched=!switched;
-        } else {
-            if (switched){
-                digitalWrite(myPins[1],HIGH);
-                disp.display(2,9);
-            } else {
-                 digitalWrite(myPins[1],LOW);
-                 disp.display(2,0);
-            }
-    
-        }
-
-         String str="";
-                if (Serial.available() > 0) 
-                {     
-                str = Serial.readString();
-                if (str.indexOf("red")!=-1) {
-                       
-                       endBlink(pinNow);
-                       
-                       digitalWrite(red_led,LOW);
-                       pinNow=0;
-                       
-                }
-
-
-                }
-
-
-
-
-
-
-        } 
-
-
-
-
-
-
-        }
-
-
+    { 
+      for (int pin:myPins)
+      {
+          digitalWrite(pin, LOW);
+      }
+      int manual_now_time=millis();
+      while(manual_now_time-manual_start_time<manual_max_time)
+      {
+        //enter commands
+        //...
+        manual_now_time=millis();
+      }
+      switchYellow();
+      mode=0;
     }
 
     if (mode == 0) {
@@ -160,7 +131,6 @@ void loop(){
                 endBlink(ledNow);
                 disp.display(1,1);
                 mode=1;
-                service_menu=true;
                 break;
 
 
@@ -198,12 +168,4 @@ void loop(){
         //disp.clear();
         }
     }
-
-
-
-
-
-
-
-
 }
