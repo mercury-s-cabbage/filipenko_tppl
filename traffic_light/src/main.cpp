@@ -1,5 +1,5 @@
 #include <Arduino.h>
-//ports o
+//ports 
 const int red_led=4;
 const int green_led=2;
 const int yellow_led=3;
@@ -11,38 +11,24 @@ const int traffic_blink_delay=200;
 //yellow lighting between modes
 const int switch_yellow_delay=3000;
 
-//??
-const long traffic_delay=16000;
-const  int traffic_yellow_delay=7000;
-
-//mode 0 -default, 1 -manual
+//mode 1 -default, 0 -manual
 int mode=1;
-int manual_max_time=60000;
+long manual_max_time=60000;
 
 //increment how to go array
 int inc=1;
-//light 0 -green, 1 -yellow, 2 -red
+//light 0 -green, 1 -blinking, 2 -yellow, 3-red, 4-yellow
 int ledNow=2;
 
-
-//additional display
-#define CLK 9
-#define DIO 8
-#include "GyverTM1637.h"
-GyverTM1637 disp(CLK, DIO);
-
 //pins
-int myPins[] = {red_led, yellow_led, green_led};
+int myPins[] = {green_led, green_led, yellow_led, red_led, yellow_led};
 void setup() 
 { 
   for (int pin:myPins)
   {
     pinMode(pin, OUTPUT);
-    digitalWrite(pin, HIGH);
   }
-
-  disp.clear();
-  disp.brightness(7);
+  Serial.write(" Type 0 for manual, 1 for default \n");
   Serial.begin(9600);
 }
 
@@ -83,6 +69,8 @@ void switchYellow()
     int start_yellow=millis();
     int now_yellow=millis();
     digitalWrite(yellow_led,HIGH);
+    digitalWrite(red_led,LOW);
+    digitalWrite(green_led,LOW);
     while (now_yellow-start_yellow<switch_yellow_delay)
     {
       now_yellow=millis();
@@ -90,82 +78,91 @@ void switchYellow()
     digitalWrite(yellow_led,LOW);
 }
 
-//потом перенести в энтер мод
-int manual_start_time=millis();
+int manual_start_time;
+int default_start_time;
 void loop()
 {
-    //enter mode
-    //...
-
-    //manual
-    if (mode==1)
-    { 
-      for (int pin:myPins)
+    String buf = "";
+    if (Serial.available() > 0) 
+    {
+      buf = Serial.readString();
+      Serial.write("echo ");
+      Serial.println(buf);
+      if (buf == "0") //manual
       {
-          digitalWrite(pin, LOW);
+        if (String(mode)!=buf)
+        {
+          switchYellow();
+          int manual_start_time=millis();
+          Serial.write(" Changing mode to manual \n");
+          Serial.write(" Type r for red, g for green \n");
+        }
+        mode = 0;
       }
-      int manual_now_time=millis();
-      while(manual_now_time-manual_start_time<manual_max_time)
+      else if (buf == "1") //default
       {
-        //enter commands
-        //...
-        manual_now_time=millis();
+        if (String(mode)!=buf)
+        {
+          switchYellow();
+          int default_start_time=millis();
+          Serial.write(" Changing mode to default\n");
+        }
+        mode = 1;
       }
-      switchYellow();
-      mode=0;
     }
 
-    if (mode == 0) {
-        for (int pin:myPins){
-                digitalWrite(pin, LOW);}
-        long start_time=millis();
-        bool fl=true;
-        bool switchTurn=false;
-       // int pinNow=0;
-        while (fl)
-        {   disp.display(0,ledNow);
-            if (Serial.available() > 0)
-          {   
-              String input=Serial.readString();
-              if (input.indexOf("stop")!=-1){
-                endBlink(ledNow);
-                disp.display(1,1);
-                mode=1;
-                break;
-
-
-
-              }  
+    //manual
+    if (mode==0)
+    { 
+      int manual_now_time=millis();
+      if(manual_now_time-manual_start_time<=manual_max_time)
+      {
+          if (buf == "g") 
+          {
+            Serial.write(" Green \n");
+            digitalWrite(myPins[ledNow], LOW);
+            ledNow=0;
+            digitalWrite(myPins[ledNow], HIGH);
           }
+          if (buf == "r")
+          {
+            Serial.write(" Red \n");
+            digitalWrite(myPins[ledNow], LOW);
+            ledNow=3;
+            digitalWrite(myPins[ledNow], HIGH);
+          }
+      }
+      else
+      {
+        Serial.write(" Time goes up \n");
+        mode=1;
+      }
+    }
+    //default
+    if (mode == 1) 
+    {
 
-        if (millis()>=start_time+traffic_delay && ledNow!=1) 
-        {   start_time=millis();
-            endBlink(ledNow);
-            disp.display(2,1);
-
-            ledNow=ledNow+inc;
-            if (ledNow==3){
-                ledNow=1;
-                inc=-1;
+      //if blinking green
+      if(ledNow==1)
+      {
+          endBlink(ledNow);
+          ledNow += 1;
+          default_start_time=millis();
+      }
+      else
+      {
+        int default_now_time=millis();
+        digitalWrite(myPins[ledNow], HIGH);
+        if (default_now_time-default_start_time>durations[ledNow])
+        {
+            digitalWrite(myPins[ledNow], LOW);
+            ledNow += 1;
+            if (ledNow>4)
+            {
+              ledNow=0;
             }
-            if (ledNow==-1){
-                ledNow=1;
-                inc=1;
-            }
-        } else {
-            disp.display(0,ledNow);
-            digitalWrite(myPins[ledNow],HIGH);
+            default_start_time=millis();
         }
-        if (start_time+traffic_yellow_delay<=millis() and ledNow==1){
-            start_time=millis();
-            disp.display(2,0);
-            digitalWrite(myPins[ledNow],LOW);
-            ledNow+=inc;
-        } else {
-            digitalWrite(myPins[ledNow],HIGH);
-        }
-        disp.display(3,inc+3);
-        //disp.clear();
-        }
+      }
     }
 }
