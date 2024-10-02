@@ -39,7 +39,7 @@ void setup() {
 //    delay(delayForSwithPos);
        // change delay to millis
       long start=millis();
-      while (start+delayForSwithPos>=millis(){
+      while (start+delayForSwithPos>=millis()){
       }
 
     digitalWrite(serviceLed,HIGH);
