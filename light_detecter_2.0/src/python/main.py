@@ -9,20 +9,19 @@ connection_led = serial.Serial(port_led, timeout=1) # baudrate=9600
 connection_photo = serial.Serial(port_photo, timeout=1) # baudrate=9600
 
 def send_command(cmd: str, response_len: int, connection: serial.Serial) -> str:
-    str_resp: str = ""
     connection.write(cmd.encode())
     if response_len > 0:
         # connection.in_waiting <-> available()
         resp: bytes = connection.read(response_len)
-        str_resp = resp.decode()
-        print(str_resp)
-    return str_resp
+    return resp
 
 while True:
     photo_val_resp: str = send_command('p', responses['p'], connection_photo)
     if photo_val_resp:
-        photo_val = int(photo_val_resp)
-        if photo_val > 500:
+        photo_val = int.from_bytes(photo_val_resp,"big")
+        if photo_val > 10:
             resp = send_command('u', responses['u'], connection_led)
+            print("up")
         else:
             resp = send_command('d', responses['d'], connection_led)
+            print("down")
