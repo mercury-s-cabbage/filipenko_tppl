@@ -1,5 +1,4 @@
 #include <Arduino.h>
-int myFunction(int, int);
 #define leftPin A5
 void setup() {
     Serial.begin(9600);
@@ -7,6 +6,20 @@ void setup() {
 }
 
 void loop() {
-  int left = analogRead(leftPin);
-  Serial.println(left);
-}
+  if(Serial.available()>0){
+    int teststr = Serial.read();
+  
+    if (teststr==112){
+     
+    int left = analogRead(leftPin);
+    byte leftByte = left / 4; 
+
+    Serial.write(leftByte);
+    }
+    else{
+        Serial.println("unknown command");
+    }
+
+
+  }
+  }
