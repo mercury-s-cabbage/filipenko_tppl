@@ -8,7 +8,7 @@ void loop() {
   if(Serial.available()>0) {
      String teststr = Serial.readString();
     teststr.trim();
-    if (teststr=="u"){
+    if (teststr==""){
         digitalWrite(led,HIGH);
     }
     if (teststr=="d"){
