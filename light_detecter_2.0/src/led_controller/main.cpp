@@ -8,10 +8,10 @@ void loop() {
   if(Serial.available()>0) {
      String teststr = Serial.readString();
     teststr.trim();
-    if (teststr=="on"){
+    if (teststr=="u"){
         digitalWrite(led,HIGH);
     }
-    if (teststr=="off"){
+    if (teststr=="d"){
         digitalWrite(led,LOW);
     }
 

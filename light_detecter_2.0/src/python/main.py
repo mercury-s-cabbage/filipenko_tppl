@@ -15,6 +15,7 @@ def send_command(cmd: str, response_len: int, connection: serial.Serial) -> str:
         # connection.in_waiting <-> available()
         resp: bytes = connection.read(response_len)
         str_resp = resp.decode()
+        print(str_resp)
     return str_resp
 
 while True:
