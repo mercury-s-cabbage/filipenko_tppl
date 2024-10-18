@@ -3,15 +3,17 @@ import paho.mqtt.client as mqtt_client
 import random
 from uuid import getnode as get_mac
 import hashlib
+import serial
+import time
 
 broker="broker.emqx.io"
-
+port_photo = "/dev/ttyUSB0"
 h = hashlib.new('sha256')
 mac = get_mac()
 h.update(str(mac).encode())
 pub_id = h.hexdigest()[:10]
 print(f"Listen me at id {pub_id}")
-
+connection_photo = serial.Serial(port_photo, timeout=1) # baudrate=9600
 client = mqtt_client.Client(
     mqtt_client.CallbackAPIVersion.VERSION2,
     pub_id
@@ -23,10 +25,14 @@ client.loop_start()
 print("Publishing")
 
 for i in range(100):
-    state = "on" if random.randint(0, 1) else "off"
-    print(f"Publishung {state}")
-    client.publish(f"lab/{pub_id}/led/state", state)
-    time.sleep(2)
+    connection_photo.write(b"p")
+
+
+    resp= connection_photo.readline().decode("ASCII")
+    photo_val =int(resp.replace("\n",""))// 4 #нормализация до 255
+    print(f"Publishung {photo_val}")
+    client.publish(f"lab/{pub_id}/photo/instant", photo_val)
+    time.sleep(1)
 
 client.disconnect()
 client.loop_stop()
