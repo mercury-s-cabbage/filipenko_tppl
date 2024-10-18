@@ -23,6 +23,20 @@ print("Connecting to broker",broker)
 print(client.connect(broker))
 client.loop_start()
 print("Publishing")
+import time
+def getValues(conn):
+
+
+    start_time = time.time()
+    returns=[]
+    print("connect")
+    conn.write(b"p")
+    resp = conn.readlines()
+    end_time = time.time()
+    elapsed_time = end_time - start_time
+
+    print(f"The task took {elapsed_time:.2f} seconds to complete. {len(resp)}  , {resp}")
+
 
 for i in range(100):
     connection_photo.write(b"p")
