@@ -14,7 +14,6 @@ h = hashlib.new('sha256')
 mac = get_mac()
 h.update(str(mac).encode())
 sub_id = h.hexdigest()[10:20]
-
 def on_message(client, userdata, message):
     data = str(message.payload.decode("utf-8"))
     print("received message =", data)
