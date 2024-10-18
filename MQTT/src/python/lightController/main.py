@@ -5,14 +5,25 @@ from uuid import getnode as get_mac
 import hashlib
 import serial
 import time
+import requests
 
-broker="broker.emqx.io"
-port_photo = "/dev/ttyUSB0"
 h = hashlib.new('sha256')
 mac = get_mac()
 h.update(str(mac).encode())
 pub_id = h.hexdigest()[:10]
-print(f"Listen me at id {pub_id}")
+payload = {
+    "message": pub_id
+}
+response = requests.post("http://10.8.0.1:5000/refresh", json=payload)
+if response.status_code == 200:
+    print("OK")
+else:
+    print(f"Request failed with status code {response.status_code}")
+    raise Exception("Can't publish id")
+
+
+broker="broker.emqx.io"
+port_photo = "/dev/ttyUSB0"
 connection_photo = serial.Serial(port_photo, timeout=1) # baudrate=9600
 client = mqtt_client.Client(
     mqtt_client.CallbackAPIVersion.VERSION2,
