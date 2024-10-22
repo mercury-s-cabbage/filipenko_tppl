@@ -6,16 +6,21 @@ void setup() {
 }
 
 void loop() {
+
   if(Serial.available()>0){
     int teststr = Serial.read();
   
     if (teststr==112){
-     
-    int left = analogRead(leftPin);
+    for (size_t i = 0; i < 100; i++)
+    {
     
+        int left = analogRead(leftPin);
+  
 
-    Serial.println(left);
+        Serial.write(left);
+       
     }
+     }
     else{
         Serial.println("unknown command");
     }

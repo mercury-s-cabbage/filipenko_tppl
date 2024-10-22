@@ -12,9 +12,9 @@ void loop() {
     if (teststr==112){
      
     int left = analogRead(leftPin);
-    
+    byte leftByte = left / 4; 
 
-    Serial.println(left);
+    Serial.write(leftByte);
     }
     else{
         Serial.println("unknown command");

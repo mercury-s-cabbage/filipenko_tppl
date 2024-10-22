@@ -3,18 +3,23 @@ import paho.mqtt.client as mqtt_client
 import random
 from uuid import getnode as get_mac
 import hashlib
+import requests
 
 broker="broker.emqx.io"
 pub_id=""
 
-if not pub_id:
-    raise RuntimeError("Publisher id is not defined. Run pub.py to get ID")
+response = requests.get('http://10.8.0.1:5000/get_id')
+if response.status_code == 200:
+    data = response.json()
+    pub_id = data['pub_id']
+    print(pub_id)
+else:
+    print(f"Request failed with status code {response.status_code}")
 
 h = hashlib.new('sha256')
 mac = get_mac()
 h.update(str(mac).encode())
 sub_id = h.hexdigest()[10:20]
-
 def on_message(client, userdata, message):
     data = str(message.payload.decode("utf-8"))
     print("received message =", data)
