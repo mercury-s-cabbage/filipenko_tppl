@@ -1,38 +1,63 @@
+import time
+import paho.mqtt.client as mqtt_client
+import random
+from uuid import getnode as get_mac
+import hashlib
 import serial
 import time
-responses = {'d': 7,  # "led_off"
-             'u': 6,  # "led_on"
-             'p': 4}  # 0 -> 1023 zero fill to leftside
-port_led = "/dev/ttyUSB0" # "COM4" or similar for windows
-port_photo =  "/dev/ttyUSB0" # "COM4" or similar for windows
-#connection_led = serial.Serial(port_led, timeout=1) # baudrate=9600
-connection_photo = serial.Serial(port_photo, timeout=1,baudrate=1000000) # baudrate=9600
-count=0
-buf = 0
-c= 'p'.encode()
-time.sleep(6)
-start_time = time.time()
-def send_command(cmd: str, response_len: int, connection: serial.Serial) -> str:
-    global count
-    global start_time
-    global buf
-    global c
+import requests
 
-    connection.write(c)
-    if response_len > 0:
-        # connection.in_waiting <-> available()
-        resp = connection.read()
-    if count%1000==0:
+h = hashlib.new('sha256')
+mac = get_mac()
+h.update(str(mac).encode())
+pub_id = h.hexdigest()[:10]
+payload = {
+    "message": pub_id
+}
+response = requests.post("http://10.8.0.1:5000/refresh", json=payload)
+if response.status_code == 200:
+    print("OK")
+else:
+    print(f"Request failed with status code {response.status_code}")
+    raise Exception("Can't publish id")
 
-        end_time = time.time()
-        elapsed_time = end_time - start_time
-        print(f"The task took {elapsed_time:.2f} seconds to complete {count} values, last 1000 values in {round(end_time-buf,3)}")
-        buf = end_time
-    count+=1
-    return resp
 
-while True:
-    photo_val_resp: str = send_command('p', responses['p'], connection_photo)
+broker="broker.emqx.io"
+port_photo = "/dev/ttyUSB0"
+connection_photo = serial.Serial(port_photo, timeout=1) # baudrate=9600
+client = mqtt_client.Client(
+    mqtt_client.CallbackAPIVersion.VERSION2,
+    pub_id
+)
 
-    if photo_val_resp:
-        photo_val =photo_val_resp
+print("Connecting to broker",broker)
+print(client.connect(broker))
+client.loop_start()
+print("Publishing")
+import time
+def getValues(conn):
+
+
+    start_time = time.time()
+    returns=[]
+    print("connect")
+    conn.write(b"p")
+    resp = conn.readlines()
+    end_time = time.time()
+    elapsed_time = end_time - start_time
+
+    print(f"The task took {elapsed_time:.2f} seconds to complete. {len(resp)}  , {resp}")
+
+
+for i in range(100):
+    connection_photo.write(b"p")
+
+
+    resp= connection_photo.readline().decode("ASCII")
+    photo_val =int(resp.replace("\n",""))// 4 #нормализация до 255
+    print(f"Publishung {photo_val}")
+    client.publish(f"lab/{pub_id}/photo/instant", photo_val)
+    time.sleep(1)
+
+client.disconnect()
+client.loop_stop()
