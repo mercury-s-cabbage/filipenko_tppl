@@ -1,18 +1,24 @@
 #include <Arduino.h>
+/*
+ ESP8266 Blink by Idayu Sabri
+ Blink LED Using ESP8266 NodeMCU Lua WiFi
 
-// put function declarations here:
-int myFunction(int, int);
+ Note that this sketch uses BUILTIN_LED to find the pin with the internal LED
+*/
 
 void setup() {
-  // put your setup code here, to run once:
-  int result = myFunction(2, 3);
+  pinMode(LED_BUILTIN, OUTPUT);     // Initialize the BUILTIN_LED pin as an output
+ 
 }
 
+// the loop function runs over and over again forever
 void loop() {
-  // put your main code here, to run repeatedly:
-}
-
-// put function definitions here:
-int myFunction(int x, int y) {
-  return x + y;
+  digitalWrite(LED_BUILTIN, LOW);   // Turn the LED on (Note that LOW is the voltage level
+                                    // but actually the LED is on; this is because 
+                                    // it is acive low on the ESP-01)
+  
+  delay(100);                      // Wait for a second
+  digitalWrite(LED_BUILTIN, HIGH);  // Turn the LED off by making the voltage HIGH
+  
+  delay(100);                      // Wait for two seconds (to demonstrate the active low LED)
 }
