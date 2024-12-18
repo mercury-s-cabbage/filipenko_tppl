@@ -3,6 +3,9 @@ from enum import Enum, auto
 class TokenType(Enum):
     INTEGER=auto()
     OPERATOR=auto()
+    LPAREN = auto()
+    RPAREN = auto()
+    EOL = auto()
 
 class Token:
 
@@ -12,3 +15,4 @@ class Token:
 
     def __str__(self) -> str:
         return f"{self.__class__.__name__}({self.type_}, {self.value})"
+
